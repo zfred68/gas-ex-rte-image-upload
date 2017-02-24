@@ -2,3 +2,7 @@
 example gas exercise in using jquery RTE,image resize and upload to google drive
 and using a google spreadsheet as a database for the RTE content.
 
+To replicate this project, go to your google drive and create a Google Apps Script 
+file.
+You might use the https://github.com/leonhartX/gas-github chrome add-in extension to
+connect to this repository and pull in the code.
