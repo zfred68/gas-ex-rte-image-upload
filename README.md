@@ -6,3 +6,16 @@ To replicate this project, go to your google drive and create a Google Apps Scri
 file.
 You might use the https://github.com/leonhartX/gas-github chrome add-in extension to
 connect to this repository and pull in the code.
+Otherwise just copy each file.
+
+On google drive you need to create an 'upload folder' set as follows
+code.gs
+var upload_folder = "/Projects/file upload";
+
+create a spreadsheet name set as follows
+
+
+var DATABASE_SHEET = 'test-rte-db';
+var SHEET_NAME = 'test-rte-db';
+
+
