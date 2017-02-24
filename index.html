@@ -2,13 +2,11 @@
 <html>
   <head>
     <base target="_top">
-	<script type="text/javascript" src="https:---//sites.google.com/site/southcoastbushwalkers/web/js/jquery/jquery-1.12.4.js"></script>
     
 <script
   src="https://code.jquery.com/jquery-1.12.4.js"
   integrity="sha256-Qw82+bXyGq6MydymqBxNPYTaUXXq7c8v3CwiYwLLNXU="
   crossorigin="anonymous"></script>
-	<script type="text/javascript" src="----https://sites.google.com/site/southcoastbushwalkers/web/js/jquery/jquery-ui.custom.min.js"></script>
 	<script type="text/javascript" src="https://sites.google.com/site/southcoastbushwalkers/web/js/ckextras.js"></script>
     <script type="text/javascript" src="https://sites.google.com/site/southcoastbushwalkers/web/js/jquery.rte.js"></script>
   </head>
@@ -395,7 +393,7 @@ function resizeMe(img) {
 function saveRte() {
   
   var formData = getInputElements('entry');
-        google.script.run
+  google.script.run
            .withSuccessHandler(eventSubmit)
            .withFailureHandler(eventFail)         
            .process_savetoDbRte(formData); 
