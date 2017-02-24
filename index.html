@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+	<script type="text/javascript" src="https:---//sites.google.com/site/southcoastbushwalkers/web/js/jquery/jquery-1.12.4.js"></script>
+    
+<script
+  src="https://code.jquery.com/jquery-1.12.4.js"
+  integrity="sha256-Qw82+bXyGq6MydymqBxNPYTaUXXq7c8v3CwiYwLLNXU="
+  crossorigin="anonymous"></script>
+	<script type="text/javascript" src="----https://sites.google.com/site/southcoastbushwalkers/web/js/jquery/jquery-ui.custom.min.js"></script>
+	<script type="text/javascript" src="https://sites.google.com/site/southcoastbushwalkers/web/js/ckextras.js"></script>
+    <script type="text/javascript" src="https://sites.google.com/site/southcoastbushwalkers/web/js/jquery.rte.js"></script>
+  </head>
+<body>
+<style>
+#popup-list {
+background-color: #b3acac;
+box-shadow: 4px -4px 6px 4px #545252;
+margin-left: auto;
+margin-right: auto;
+left:20%;
+
+}
+#sel-title {
+width:100%;
+bacground-color:#420042;
+
+}
+.option {
+width:100%;
+}
+</style>
+<p>This is a google apps test page.
+<pre>
+The test is an exercise in 
+1) executing a Google Apps Script, 
+2) JQuery Rich Text Editor RTE, 
+3) overriding a RTE function, allowing only a fixed reduced size image in the RTE content,
+4) saving the image on google drive as a html reference for the content
+5) saving the content
+6) selecting and retrieving the content
+7) using a Google spreadsheet as a database
+
+</pre>
+</p>
+<!-- popup window displaying titles to select
+-->
+<div id="popup-list" style="z-index: 480;position: absolute; width: 400px;  top: 41px; visibility: hidden;display:block;background-color:#424242">
+<h4 id="popup-sub-header" style="margin: 0px 0px;padding:0px;color:white;">Select <<'new'>> or an existing note to edit</h4>
+<form id="form-popup-list">
+
+<select id="sel-title" length="62" size="10" width="90%">
+  <option value="new">'<'new title'>'</option>
+</select>
+<br>
+     <input type="button"  value="Ok" onclick="javascript:selectTitle();"></input><br>  
+</form>
+</div>
+
+<!-- the main window with jQuery Rich Text Editor
+-->
+<form id="entry">
+<p style="background-color: lightblue;">
+    <input type="text" id="title" size="62" maxlength="62">
+    <input type="hidden" id="timeStamp">
+    <br>
+    <input type="textarea" name="description" id="description"   width="90%" height="480" class="rte-zone"></textarea>
+</p>
+</form>
+
+
+<style>
+.popup-image-get {
+background-color: #b3acac;
+box-shadow: 4px -4px 6px 4px #4c4848;
+}
+</style>
+
+<input type="button"  value="debug" onclick="javascript:stopdebug();"></input><br>
+<input type="button"  value="submit Note" onclick="javascript:saveRte();"></input><br>
+<input type="button"  value="select Note" onclick="javascript:getTitles();"></input><br>
+
+<div class="popup-image-get" id="uploadSection" style="position: absolute;display:gnone;visibility:hidden;height:350px;width:350px">
+<input type='file' id="imagefile" accept="image/*" onchange='renderImage(this.files[0])'>
+<div id='preview'>
+ <!--image will be inserted here-->
+ <div id="dumy"></div>
+</div>
+   <form id="myForm">
+        <input type="button" id="ok" value="Submit" onclick="picUploadJs(this.parentNode)" />
+        <input type="button" id="cancel" value="cancel" onclick="javascript:cancel();"/>
+   </form>
+  <div id="status" style="color:F00000">
+  <!-- div will be filled with innerHTML after form submission. -->
+  
+  </div>
+<script>
+$(document).ready(function(){
+    $("#btn-image-get").click(function(){
+        var $x = $(".popup-image-get");
+        $x.css("visibility","visible");
+        $x.css("color", "FF0000");
+    });
+    $(".popup-image-get #-ok").click(function(){
+    	  var $x = $(".popup-image-get");
+        $x.css("visibility","hidden");
+    });
+    $(".popup-image-get #cancel").click(function(){
+    	  var $x = $(".popup-image-get");
+        $x.css("visibility","hidden");
+    });
+    console.log('ready');
+//
+// on load get titles to retrieve
+// 
+(function() {
+   getTitles();    
+})();    
+
+});
+
+$('#sel-title').change(function(e) {
+   $v= $("#sel-title option:selected"); //alt: $("#sel-title").children("option").filter(":selected").‌​
+   $("#entry #title").val($v.text());
+   $("#entry #timeStamp").val($v.val());
+   console.log('change '+$v.text() + ' :'+$v.val()); 
+   return false;
+});
+
+function selectTitle() {
+   $("#popup-list").css("visibility","hidden");
+   // now get the note from server if not <new>
+   //
+   var timeStamp =$("#entry #timeStamp").val();
+   getNote(timeStamp);
+}
+
+
+function getNote(timestamp) {
+     google.script.run
+    .withSuccessHandler(gotNote)
+    .withFailureHandler(TitlesError)
+    .processGetNote(timestamp);
+    }
+
+function gotNote(note) {
+    var u = decodeURIComponent(note);
+    $nb = $("#description");
+    $nb.rte.sethtml(u);
+     
+}
+
+function getTitles() {
+    debugger;
+     google.script.run
+    .withSuccessHandler(gotTitles)
+    .withFailureHandler(TitlesError)
+    .processGetTitles();
+    }
+    
+function stopdebug() {
+var $e = $(".rte-zone");
+var $x = $('#toolbar-id_description');
+
+debugger;
+}
+
+
+function gotTitles(s) {
+   for(var i=0; i < s.length; i++) {
+     console.log(s[i]);
+   }
+  $("#sel-title").empty();
+  var el = document.getElementById('popup-list');
+  var es = document.getElementById('sel-title');
+  var opt = document.createElement('option');
+  opt.value="<<new title>>";
+  opt.innerHTML="<pre><< new title >></pre>";
+  es.appendChild(opt);
+  
+  
+   for(var i=0; i < s.length; i++) {
+     var a = s[i]["title"];
+     var b = s[i]["timeStamp"];
+     var c = '<option value="'+b+'" >'+a+'</option>';
+     var opt = document.createElement('option');
+     opt.value=b;
+     opt.innerHTML=a;
+     es.appendChild(opt);
+   }
+   el.style.visibility='visible';
+}
+
+function TitlesError() {
+}
+
+</script>
+</div>
+ 
+</body>
+  
+<script type="text/javascript">
+
+  var myRte = $(".rte-zone").rte({
+    content_css_url: "https://sites.google.com/site/southcoastbushwalkers/web/js/jquery.rte.css",
+    media_url: "https://sites.google.com/site/southcoastbushwalkers/web/js/img/"
+  });
+
+ //
+ // override the RTE's image button
+ //
+ $('#toolbar-description .image').unbind('click');
+ $('#toolbar-description .image').click(function() {
+   var imgRef= uploadThumbImg();
+   return false; 
+   });
+   
+
+var max_width=320;
+var max_height=190;
+var preview = document.getElementById('preview');
+var last_image;
+var count_images=0;
+var count_images_max=2;
+
+//check if browser supports file api and filereader features
+if (window.File && window.FileReader && window.FileList && window.Blob) {
+    
+   //
+   //this function is called when the input loads an image
+   //image is loaded to a hidden elemnt, then resized and previewed
+   //
+    function renderImage(file) {
+        var reader = new FileReader();
+        reader.onload = function(event){
+          var url = event.target.result;
+          
+          var image = new Image();
+          
+          image.src = url;            
+          image.name="imagefileA";
+          image.onload = function() {
+            // have to wait till it's loaded
+            var resized = resizeMe(image); // send it to canvas for resizing
+            var newinput = document.createElement("input");
+            var form = document.getElementById("myForm");
+            
+            newinput.type = 'hidden';
+            newinput.name = 'imagefile';
+            newinput.id   = 'imagefile';
+            newinput.value = resized; // put result from canvas into new hidden input
+            form.appendChild(newinput);
+            
+            var nameinput = document.createElement("input");
+            nameinput.type = 'hidden';
+            nameinput.name = 'imagefile_name';
+            nameinput.id   = 'imagefile_name';
+            nameinput.value = file.name;
+            form.appendChild(nameinput);
+          
+          }
+        }
+   
+    //when the file is read it triggers the onload event above.
+        reader.readAsDataURL(file);
+    }
+    
+}else {       
+
+  alert('The File APIs are not fully supported in this browser.');
+
+}
+
+// === image thumb image retrieval ===
+function uploadThumbImg() {
+   var pos=getMouPosition();
+   
+   if(count_images >= count_images_max) {
+     alert("sorry you can only use "+count_images_max+" pictures");
+     return;
+   }
+  
+   $(".popup-image-get #preview").empty();
+   var $f = $(".popup-image-get #imagefile");
+   //$f.val("");
+   var $c = $(".popup-image-get #ok");
+   $c.val("Submit");
+   
+   var $fm = $(".popup-image-get #myForm #imagefile");
+   $fm.remove();
+   var $fi = $(".popup-image-get #myForm #imagefile_name");
+   $fi.remove();
+    var statusDiv = document.getElementById('status');
+    statusDiv.innerHTML="";
+       
+   var $x = $(".popup-image-get");
+   if(pos.x+$x.clientWidth > pageWidth()) {
+	  pos.x = pageWidth()-$x.clientWidth;
+	}
+	$x.css("left", pos.x+"px");
+	$x.css("top",20+"px");
+	$x.css("visibility","visible");
+    $x.css("color", "FF0000");
+        
+}
+// === form processing ==============================
+
+function picUploadJs(frmData) {
+    
+  var $c=$(".popup-image-get #myForm #ok");
+  if( $c.val() == "Ok") {
+    var $x = $(".popup-image-get");
+        $x.css("visibility","hidden");
+    return;
+  }
+  var statusDiv = document.getElementById('status');
+  statusDiv.innerHTML =" Uploading. Please wait...";
+
+  document.getElementById('status').style.display = 'inline';
+
+  google.script.run
+    .withSuccessHandler(updateOutput)
+    .withFailureHandler(updateError)
+    .processImageForm(frmData);
+}
+  // Javascript function called by "submit" button handler,
+  // to show results.
+
+function updateOutput(s) {
+
+    var outputDiv = document.getElementById('status');
+    outputDiv.innerHTML = "The File was UPLOADED! "+s;
+    last_image = s;
+    myRte.rte.formatText('InsertImage', last_image);
+    var $c=$(".popup-image-get #ok");
+    $c.val("Ok");
+    
+ 
+    count_images++;
+}
+
+function updateError() {
+    var outputDiv = document.getElementById('status');
+    outputDiv.innerHTML = "The File error uploading....!";
+
+}
+
+
+// === RESIZE ========================================
+
+function resizeMe(img) {
+  
+  var canvas = document.createElement('canvas');
+
+  var width = img.width;
+  var height = img.height;
+
+  // calculate the width and height, constraining the proportions
+  if (width > height) {
+    if (width > max_width) {
+      //height *= max_width / width;
+      height = Math.round(height *= max_width / width);
+      width = max_width;
+    }
+
+  } else {
+
+    if (height > max_height) {
+      //width *= max_height / height;
+      width = Math.round(width *= max_height / height);
+      height = max_height;
+    }
+  }
+  
+  // resize the canvas and draw the image data into it
+  canvas.width = width;
+  canvas.height = height;
+  var ctx = canvas.getContext("2d");
+  ctx.drawImage(img, 0, 0, width, height);
+  
+  var c = preview.childNodes;
+      
+  if(preview.hasChildNodes()){
+	 preview.replaceChild(canvas,c[1]);     
+  }else
+  preview.appendChild(canvas); // do the actual resized preview
+  
+  return canvas.toDataURL("image/jpeg",0.7); // get the data from canvas as 70% JPG (can be also PNG, etc.)
+
+}
+// ===============================================================
+// submit an entry form (send to server app script)
+// === saveRte ===================================================
+function saveRte() {
+  
+  var formData = getInputElements('entry');
+        google.script.run
+           .withSuccessHandler(eventSubmit)
+           .withFailureHandler(eventFail)         
+           .process_savetoDbRte(formData); 
+ 
+}
+//===========================================================================
+function eventSubmit(msg) {
+   var pdfstring='non';
+   msgmsg("thankyou for submitting event");
+}
+
+function eventFail(msg) {
+   msgmsg("failure occured in submitting event info, please try again." + msg);
+   $('#Submit1').disabled=false;
+}
+
+//============================================================================
+//===========================================================================
+//  return JSON of input elements of a form
+//
+function getInputElements(formId) {
+    var form = document.getElementById(formId);
+    if (form === null) {
+        return null;
+    }
+    elements = [];
+    ii= form.getElementsByTagName('input');
+    for(i=0;i<ii.length;i++) {
+    	var inp = ii[i];
+    	var inpj;
+    	if(inp.type=="text") {
+          if(inp.className == "rte-zone") {
+              $e = $('#'+inp.id);
+              var t= encodeURI($e.rte.html());
+              inpj = {"name":elementdefname(inp),"type":inp.type,"value":t};
+           }else{
+              var t= inp.value.trim();
+              t = t.replace('/^[-_0-9a-zA-Z ]//g');
+    	      inpj = {"name":elementdefname(inp),"type":inp.type,"value":t};        
+          }
+    	}else
+    	if(inp.type == "radio") {
+         var name = elementdefname(inp);
+    	 if( inresultArray(elements,name)) 
+    	    continue;
+    	    
+    	 var val = $('input[name="'+name+'"]:checked').val();
+    	   	 
+    	 inpj = {"name":name,"type":inp.type,"value":val,"checked":inp.checked};
+    	 
+    	}else   
+        if(inp.type == "textarea") {
+           if(inp.className == "rte-zone") {
+              $e = $('#'+inp.id);
+              var t= encodeURI($e.rte.html());
+              inpj = {"name":elementdefname(inp),"type":inp.type,"value":t};
+           }else{
+           	 inpj = {"name":elementdefname(inp),"type":inp.type,"value":inp.value};    
+           }
+        }else
+    	if(inp.type == "checkbox"){
+    	 inpj ={ "name":elementdefname(inp), "type":inp.type, "value":inp.value, "checked":inp.checked};
+    	}else 
+        if(inp.type == "hidden"){
+         inpj ={ "name":elementdefname(inp), "type":inp.type, "value":inp.value};
+        }else
+        if(inp.type == "file"){
+         inpj ={ "name":elementdefname(inp), "type":inp.type, "value":inp.value};
+        }else
+        {
+    		continue;
+    	}
+    	elements.push(inpj);	
+    }
+    
+    var result = '{ "inputs":' + JSON.stringify(elements) + '}';
+        
+    return result;
+}
+
+function inresultArray(a,name){
+   var i=0;
+   for (;a[i];i++) {
+    var b=a[i];
+    if(b.name==name)
+      return true; 
+   }
+
+   return false;
+}
+
+function elementdefname(element) {
+	var r=element.name;
+	if(r == null || r == "" || typeof(r) == "undefined"){
+	  r=element.id;
+	}
+	return r;
+}  
+
+
+function msgmsg(msg,opt) {
+  alert(msg);
+}
+</script>  
+</html>
+
+
