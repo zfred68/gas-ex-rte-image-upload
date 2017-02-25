@@ -18,4 +18,7 @@ create a spreadsheet name set as follows
 var DATABASE_SHEET = 'test-rte-db';
 var SHEET_NAME = 'test-rte-db';
 
+theincluded rte is from https://github.com/buntekuh/jquery-rte
+
+but i had to make changes to it
 
